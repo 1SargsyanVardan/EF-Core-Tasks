@@ -1,5 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ConsoleApp1;
+using Microsoft.Data.SqlClient;
+using System.Net.NetworkInformation;
+using System.Runtime.Intrinsics.X86;
+using System;
+using Microsoft.Identity.Client;
+
+using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using System.Reflection.Metadata;
+
 using (TasksContext ts = new TasksContext())
 {
     //task 1 adding new customers
@@ -14,9 +24,9 @@ using (TasksContext ts = new TasksContext())
 
     ts.SaveChanges();*/
     //task1...Retrieve Active Customers
-    /*   var customer = ts.Customers.Where(x => x.Status == "Active");
-       foreach (var c in customer)
-           Console.WriteLine($"{c.Name} - {c.Address} - {c.Status}");*/
+    /*var customer = ts.Customers.Where(x => x.Status == "Active");
+    foreach (var c in customer)
+        Console.WriteLine($"{c.Name} - {c.Address} - {c.Status}");*/
 
     //Task2  adding new products
     /*Product product1 = new Product { Name = "Laptop", Price = 110, StockQuantity = 12 };
@@ -214,10 +224,10 @@ using (TasksContext ts = new TasksContext())
     ts.callDetails.Add(call3);
     ts.callDetails.Add(call4);
     ts.SaveChanges();*/
-    /*var callDetails = ts.callDetails.ToList();
+    //var callDetails = ts.callDetails.ToList();
 
-    var average =callDetails.Average(p => (p.EndDate - p.StartDate).TotalSeconds);
-    Console.WriteLine(average);*/
+    //var average = callDetails.Average(p => (p.EndDate - p.StartDate).TotalSeconds);
+    //Console.WriteLine(average);
 
     //Task 19:Retrieve Customers with Tracking
     /* var customers = ts.Customers.ToList();*/
@@ -241,4 +251,173 @@ using (TasksContext ts = new TasksContext())
 
     //Task 23: Delete Old Orders
     //ts.Orders.Where(c => c.Date < DateTime.Now.AddYears(-1)).ExecuteDelete();
+}
+//Task11
+//Func<TasksContext, int, Customer?> customerById =
+//            EF.CompileQuery((TasksContext ts, int id) =>
+//                    ts.Customers.FirstOrDefault(c => c.Id == id));
+using (TasksContext ts = new TasksContext())
+{
+    //FromSqlRaw / ExecuteSqlRaw:
+    //Task 1: Retrieve Products Using Raw SQL
+    /*SqlParameter param = new SqlParameter("@Price", "200");
+    var products = ts.Products.FromSqlRaw("SELECT * FROM Products WHERE Price > {0}", param);
+    foreach (var product in products)
+        Console.WriteLine(product.Name);*/
+
+    //Task 2: Update Product Prices Using Raw SQL
+    /*string category = "Laptop";
+    int newPrice = 350;
+    int s = ts.Database.ExecuteSqlRaw("UPDATE Products SET Price={0} WHERE Category={1}", newPrice , category);
+    Console.WriteLine($"{s} rows updated!");*/
+
+    //FromSqlInterpolated / ExecuteSqlInterpolated:
+    //Task 3: Retrieve Customers Using Interpolated SQL
+    /*var number = "%561%";
+    var customers = ts.Customers.FromSqlInterpolated($"SELECT * FROM Customers WHERE ContactNumber LIKE {number}").ToList();
+    foreach ( var customer in customers )
+        Console.WriteLine(customer.Name + " " + customer.ContactNumber);*/
+
+    //????   //Task 4: Delete Inactive Customers Using Interpolated SQL
+    /*DateTime sixMonthAgo = DateTime.Now.AddMonths(-6);
+    int sumOfDeleted = ts.Database.ExecuteSqlInterpolated($@"DELETE FROM Customers 
+                        WHERE Id NOT IN
+                        (SELECT CustomerId 
+                         FROM Orders
+                         WHERE Date >= {sixMonthAgo})");*/
+    /*int sumOfDeleted = ts.Database.ExecuteSqlInterpolated($@"DELETE FROM Customers  WHERE Id IN
+         (SELECT Id 
+          FROM Customers 
+          JOIN Orders ON CustomerId = Id 
+          WHERE Date <= {lastSixMonth}");*/
+
+    //Console.WriteLine($"{sumOfDeleted} Customers are Deleted!");
+
+    //Stored Functions:
+    //Task 5: Use Scalar-valued Stored Function
+
+    //lucum.....
+
+    /* var cust = ts.Set<CustomerAge>().FromSqlRaw("SELECT dbo.GetAge('2001-14-10') as age").FirstOrDefault();
+     Console.WriteLine(cust.Age);
+         */
+
+    /*var customers = ts.Customers;
+    foreach (var cust in customers)
+    {
+        ts.GetAge(cust.dateOfBirth);
+    }*/
+
+
+
+    //Task 6: Use Table-valued Stored Function
+
+    //SqlParameter param = new SqlParameter("@param", 50);
+    //var orders = ts.Orders.FromSqlRaw("SELECT * FROM SpecificOrders (@param)", param).ToList();
+    //foreach (var order in orders)
+    //    Console.WriteLine(order.Id + " " + order.TotalAmount);
+
+    /*
+        var ord = ts.SpecificOrders(50);
+        foreach (var o in ord)
+            Console.WriteLine(o.Id + " " + o.TotalAmount);*/
+
+    /*var orders = ts.Orders.FromSqlRaw("SELECT * FROM dbo.SpecificOrders(50)").ToList();
+    foreach (var order in orders)
+        Console.WriteLine(order.Id + " " + order.TotalAmount);*/
+
+    //Stored Procedures:
+    //Task 7: Call a Simple Stored Procedure
+    //SqlParameter param = new()
+    //{
+    //    ParameterName = "@countOrders",
+    //    SqlDbType = System.Data.SqlDbType.Int,
+    //    Direction = System.Data.ParameterDirection.Output,
+    //};
+    //ts.Database.ExecuteSqlRaw("CountOrders {0}, @countOrders OUT",1, param);
+    //Console.WriteLine(param.Value);
+
+    //Task 8: Execute Complex Stored Procedure
+
+    //SqlParameter param = new("@customerId", 1);
+    //var a = ts.Database.ExecuteSqlRaw("AverageCallDuration 1");
+    //Console.WriteLine(a);
+
+    //Task9
+    /*try
+    {
+        Customer? customer = ts.Customers.FirstOrDefault();
+        if (customer != null)
+        {
+            customer.Name = "Bob";
+            ts.SaveChanges();
+            Console.WriteLine(customer.Name);
+            
+        }
+        throw new DbUpdateConcurrencyException();
+    }
+    catch (DbUpdateConcurrencyException ex)
+    {
+        string filePath = "C:\\Users\\User\\OneDrive\\Рабочий стол\\EFCore\\ConsoleApp1\\myLogger.txt";
+        using (StreamWriter writer = new StreamWriter(filePath,true))
+        {
+            writer.WriteLine(ex.Message); 
+        }
+    }*/
+
+    //Task10
+    /*ts.GetService<ILoggerFactory>().AddProvider(new MyLoggerProvider());
+    Customer c = new Customer("Hayk", "Yerevan", "+37498659865", "sdftgyhuji.@mail.ru", "paid");
+
+    ts.Customers.Add(c);
+    ts.SaveChanges();
+
+    var customers = ts.Customers.ToList();
+    foreach (var customer in customers)
+        Console.WriteLine(customer.Name + " " + customer.Address);*/
+
+    //Task11: Create and Use Compiled Query...in the top 
+    //var customer = customerById(ts, 1);
+    //if(customer != null)
+    //    Console.WriteLine(customer.Name);
+    //else
+    //    Console.WriteLine("THE CUSTOMER HAS NOT FOUND!");
+    //Task12
+    /*ts.Database.ExecuteSqlRaw(@"CREATE VIEW View_CustomerOrders AS 
+                                            SELECT Orders.Date AS Date,Orders.TotalAmount AS TotalAmount,Orders.Status AS Status,Customers.Name AS CustomerName
+                                            FROM Orders
+                                            INNER JOIN Customers on Customers.Id = Orders.customerId");
+
+*/
+    //var custom = ts.Customs.ToList();
+    //foreach (var cust in custom)
+    //{
+    //    Console.WriteLine($"Name : {cust.CustomerName}");
+    //    Console.WriteLine($"Date : {cust.Date}");
+    //    Console.WriteLine($"Amount : {cust.TotalAmount}");
+    //    Console.WriteLine($"Status : {cust.Status}");
+
+
+    //}
+    //Task13
+
+    /*Customer firstCustomer = ts.Customers.FirstOrDefault();
+    if(firstCustomer != null )
+    {
+        firstCustomer.Name = "Garik";
+        ts.SaveChanges();
+
+        firstCustomer.Name = "Lilith";
+        ts.SaveChanges();
+    }
+    Customer l = ts.Customers.FirstOrDefault(p => p.Name=="Lilith");
+    if (l != null)
+    {
+        var custEntry = ts.Entry(l);
+        var createdAt = custEntry.Property<DateTime>("PeriodStart").CurrentValue;
+        var deletedAt = custEntry.Property<DateTime>("PeriodEnd").CurrentValue;
+        Console.WriteLine($"пользователь {l.Name}");
+        Console.WriteLine($"Дата создания: {createdAt}");
+        Console.WriteLine($"Дата удаления {deletedAt}");
+    }*/
 }

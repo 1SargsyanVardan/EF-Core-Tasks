@@ -4,6 +4,7 @@ using ConsoleApp1;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ConsoleApp1.Migrations
 {
     [DbContext(typeof(TasksContext))]
-    partial class TasksContextModelSnapshot : ModelSnapshot
+    [Migration("20230815094043_orinak")]
+    partial class orinak
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -64,12 +67,7 @@ namespace ConsoleApp1.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("customerId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("customerId");
 
                     b.ToTable("callDetails");
                 });
@@ -91,25 +89,6 @@ namespace ConsoleApp1.Migrations
                         .IsUnique();
 
                     b.ToTable("cancelledOrders");
-                });
-
-            modelBuilder.Entity("ConsoleApp1.Custom", b =>
-                {
-                    b.Property<string>("CustomerName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("TotalAmount")
-                        .HasColumnType("float");
-
-                    b.ToTable((string)null);
-
-                    b.ToView("View_CustomerOrders", (string)null);
                 });
 
             modelBuilder.Entity("ConsoleApp1.Customer", b =>
@@ -136,28 +115,10 @@ namespace ConsoleApp1.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("PeriodEnd")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodEnd");
-
-                    b.Property<DateTime>("PeriodStart")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodStart");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<double?>("averageDuration")
-                        .HasColumnType("float");
 
                     b.Property<DateTime?>("dateOfBirth")
                         .HasColumnType("datetime2");
@@ -166,26 +127,7 @@ namespace ConsoleApp1.Migrations
 
                     b.HasAlternateKey("Email");
 
-                    b.ToTable("Customers", (string)null);
-
-                    b.ToTable(tb => tb.IsTemporal(ttb =>
-                            {
-                                ttb.UseHistoryTable("CustomersHistory");
-                                ttb
-                                    .HasPeriodStart("PeriodStart")
-                                    .HasColumnName("PeriodStart");
-                                ttb
-                                    .HasPeriodEnd("PeriodEnd")
-                                    .HasColumnName("PeriodEnd");
-                            }));
-                });
-
-            modelBuilder.Entity("ConsoleApp1.CustomerAge", b =>
-                {
-                    b.Property<int>("Age")
-                        .HasColumnType("int");
-
-                    b.ToTable("CustomerAge");
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("ConsoleApp1.FeaturedProducts", b =>
@@ -346,15 +288,6 @@ namespace ConsoleApp1.Migrations
                     b.ToTable("productOrders");
                 });
 
-            modelBuilder.Entity("ConsoleApp1.CallDetails", b =>
-                {
-                    b.HasOne("ConsoleApp1.Customer", "Customer")
-                        .WithMany("callDetails")
-                        .HasForeignKey("customerId");
-
-                    b.Navigation("Customer");
-                });
-
             modelBuilder.Entity("ConsoleApp1.CancelledOrders", b =>
                 {
                     b.HasOne("ConsoleApp1.Order", "Order")
@@ -413,8 +346,6 @@ namespace ConsoleApp1.Migrations
 
             modelBuilder.Entity("ConsoleApp1.Customer", b =>
                 {
-                    b.Navigation("callDetails");
-
                     b.Navigation("orders");
                 });
 

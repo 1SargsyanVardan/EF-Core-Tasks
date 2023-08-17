@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,12 @@ namespace ConsoleApp1
         public DbSet<BestSellerProducts> bestSellerProducts { get; set; }
         public DbSet<CancelledOrders> cancelledOrders { get; set; }
         public DbSet<CallDetails> callDetails { get; set; }
+        
+        public DbSet<Custom> Customs { get; set; } = null!;
+
+        //public IQueryable<Customer> GetAge(DateTime dateOfBirth) => FromExpression(() => GetAge(dateOfBirth));
         //task 6
+        //public IQueryable<Order> SpecificOrders(int param) => FromExpression(() => SpecificOrders(param));
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<Order>().HasOne(o => o.Customer).WithMany(o => o.orders).HasForeignKey(o => o.CustomerId);
@@ -47,6 +53,25 @@ namespace ConsoleApp1
                 .HasForeignKey<CancelledOrders>(e => e.OrderId);
             //Task21
             builder.Entity<Customer>().HasQueryFilter(c => c.IsDeleted == false);
+            builder.Entity<CustomerAge>().HasNoKey();
+            builder.Entity<CallDetails>().HasOne(p => p.Customer)
+                                          .WithMany(c => c.callDetails)
+                                          .HasForeignKey(d => d.customerId);
+            //builder.HasDbFunction(() => GetAge(default));
+            //builder.HasDbFunction(() => SpecificOrders(default));
+
+            //Task9
+            builder.Entity<Customer>().Property(p => p.Timestamp).IsRowVersion();
+
+            //task12
+            builder.Entity<Custom>(p =>
+            {
+                p.HasNoKey();
+                p.ToView("View_CustomerOrders");
+            });
+
+            //Task13...nuyny customeri vra
+            builder.Entity<Customer>().ToTable("Customers", t => t.IsTemporal());
         }
         public TasksContext()
         {

@@ -13,6 +13,8 @@ namespace ConsoleApp1
         public string RecieverNumber { get; set;}
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public int? customerId { get; set; }
+        public Customer? Customer { get; set; }
         public CallDetails() { }
         public CallDetails(string callerNumber, string recieverNumber, DateTime startDate, DateTime endDate)
         {

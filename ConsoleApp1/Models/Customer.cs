@@ -29,8 +29,12 @@ namespace ConsoleApp1
         {
 
         }
-        
+        [Timestamp]
+        public byte[]? Timestamp { get; set; }  
         public ICollection<Order>? orders { get; set; }
         public bool IsDeleted { get; set; } = false;
+        public DateTime? dateOfBirth { get; set; }
+        public double? averageDuration { get; set; }
+        public List<CallDetails> callDetails { get; set; } = new();
     }
 }
